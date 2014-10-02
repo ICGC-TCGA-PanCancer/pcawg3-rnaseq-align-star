@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ANALYSIS_SET xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.ncbi.nlm.nih.gov/viewvc/v1/trunk/sra/doc/SRA_1-5/SRA.analysis.xsd?view=co">
+  <ANALYSIS alias="PCAWG.94f8d946-a92e-4d2b-9f29-8e10f4274efe.bam" analysis_date="2014-08-02T21:48:26.320095" center_name="UCSC">
+    <TITLE>TCGA/ICGC PanCancer RNA-Seq re-alignment</TITLE>
+    <STUDY_REF refcenter="UCSC" refname="PCAWG 2.0">
+    </STUDY_REF>
+    <DESCRIPTION>UCSC realignment for PanCan Analysis of Whole Genome of TCGA RNA-Seq data from matched participants using Tophat2</DESCRIPTION>
+    <ANALYSIS_TYPE>
+      <REFERENCE_ALIGNMENT>
+        <ASSEMBLY>
+          <STANDARD short_name="GRCh37"/>
+        </ASSEMBLY>
+        <SEQ_LABELS>
+          <SEQUENCE data_block_name="data_block" accession="NC_000001.10" seq_label="1"/>
+          <SEQUENCE data_block_name="data_block" accession="NC_000002.11" seq_label="2"/>
+          <SEQUENCE data_block_name="data_block" accession="NC_000003.11" seq_label="3"/>
+          <SEQUENCE data_block_name="data_block" accession="NC_000004.11" seq_label="4"/>
+          <SEQUENCE data_block_name="data_block" accession="NC_000005.9" seq_label="5"/>
+          <SEQUENCE data_block_name="data_block" accession="NC_000006.11" seq_label="6"/>
+          <SEQUENCE data_block_name="data_block" accession="NC_000007.13" seq_label="7"/>
+          <SEQUENCE data_block_name="data_block" accession="NC_000008.10" seq_label="8"/>
+          <SEQUENCE data_block_name="data_block" accession="NC_000009.11" seq_label="9"/>
+          <SEQUENCE data_block_name="data_block" accession="NC_000010.10" seq_label="10"/>
+          <SEQUENCE data_block_name="data_block" accession="NC_000011.9" seq_label="11"/>
+          <SEQUENCE data_block_name="data_block" accession="NC_000012.11" seq_label="12"/>
+          <SEQUENCE data_block_name="data_block" accession="NC_000013.10" seq_label="13"/>
+          <SEQUENCE data_block_name="data_block" accession="NC_000014.8" seq_label="14"/>
+          <SEQUENCE data_block_name="data_block" accession="NC_000015.9" seq_label="15"/>
+          <SEQUENCE data_block_name="data_block" accession="NC_000016.9" seq_label="16"/>
+          <SEQUENCE data_block_name="data_block" accession="NC_000017.10" seq_label="17"/>
+          <SEQUENCE data_block_name="data_block" accession="NC_000018.9" seq_label="18"/>
+          <SEQUENCE data_block_name="data_block" accession="NC_000019.9" seq_label="19"/>
+          <SEQUENCE data_block_name="data_block" accession="NC_000020.10" seq_label="20"/>
+          <SEQUENCE data_block_name="data_block" accession="NC_000021.8" seq_label="21"/>
+          <SEQUENCE data_block_name="data_block" accession="NC_000022.10" seq_label="22"/>
+          <SEQUENCE data_block_name="data_block" accession="NC_000023.10" seq_label="X"/>
+          <SEQUENCE data_block_name="data_block" accession="NC_000024.9" seq_label="Y"/>
+          <SEQUENCE data_block_name="data_block" accession="NC_012920" seq_label="MT"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000207.1" seq_label="GL000207.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000226.1" seq_label="GL000226.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000229.1" seq_label="GL000229.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000231.1" seq_label="GL000231.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000210.1" seq_label="GL000210.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000239.1" seq_label="GL000239.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000235.1" seq_label="GL000235.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000201.1" seq_label="GL000201.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000247.1" seq_label="GL000247.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000245.1" seq_label="GL000245.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000197.1" seq_label="GL000197.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000203.1" seq_label="GL000203.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000246.1" seq_label="GL000246.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000249.1" seq_label="GL000249.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000196.1" seq_label="GL000196.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000248.1" seq_label="GL000248.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000244.1" seq_label="GL000244.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000238.1" seq_label="GL000238.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000202.1" seq_label="GL000202.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000234.1" seq_label="GL000234.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000232.1" seq_label="GL000232.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000206.1" seq_label="GL000206.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000240.1" seq_label="GL000240.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000236.1" seq_label="GL000236.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000241.1" seq_label="GL000241.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000243.1" seq_label="GL000243.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000242.1" seq_label="GL000242.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000230.1" seq_label="GL000230.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000237.1" seq_label="GL000237.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000233.1" seq_label="GL000233.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000204.1" seq_label="GL000204.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000198.1" seq_label="GL000198.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000208.1" seq_label="GL000208.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000191.1" seq_label="GL000191.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000227.1" seq_label="GL000227.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000228.1" seq_label="GL000228.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000214.1" seq_label="GL000214.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000221.1" seq_label="GL000221.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000209.1" seq_label="GL000209.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000218.1" seq_label="GL000218.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000220.1" seq_label="GL000220.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000213.1" seq_label="GL000213.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000211.1" seq_label="GL000211.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000199.1" seq_label="GL000199.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000217.1" seq_label="GL000217.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000216.1" seq_label="GL000216.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000215.1" seq_label="GL000215.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000205.1" seq_label="GL000205.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000219.1" seq_label="GL000219.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000224.1" seq_label="GL000224.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000223.1" seq_label="GL000223.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000195.1" seq_label="GL000195.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000212.1" seq_label="GL000212.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000222.1" seq_label="GL000222.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000200.1" seq_label="GL000200.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000193.1" seq_label="GL000193.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000194.1" seq_label="GL000194.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000225.1" seq_label="GL000225.1"/>
+          <SEQUENCE data_block_name="data_block" accession="GL000192.1" seq_label="GL000192.1"/>
+          <SEQUENCE data_block_name="data_block" accession="NC_007605" seq_label="NC_007605"/>
+          <SEQUENCE data_block_name="data_block" accession="hs37d5" seq_label="hs37d5"/>
+        </SEQ_LABELS>
+        <PROCESSING>
+          <PIPELINE>
+            <PIPE_SECTION section_name="mapping">
+              <STEP_INDEX>mapping</STEP_INDEX>
+              <PREV_STEP_INDEX>NIL</PREV_STEP_INDEX>
+              <PROGRAM>tophat2</PROGRAM>
+              <VERSION>2.0.10</VERSION>
+              <NOTES>tophat2 -p #threads --segment-length 20 --library-type=fr-unstranded --no-coverage-search --min-intron-length 6 --max-multihits 20 --mate-inner-dist 350 --mate-std-dev 300 -G gencode.v19.annotation.gtf --transcriptome-index GRCh37.p13.genome.chr_only_th2_trans/ --rg-id "RG_ID" --rg-sample "RG_ID" GRCh37.p13.genome.chr_only.fa -o "out_dir" left.fastq right.fastq</NOTES>
+            </PIPE_SECTION>
+            <PIPE_SECTION section_name="fix_mates">
+              <STEP_INDEX>fix_mates</STEP_INDEX>
+              <PREV_STEP_INDEX>mapping</PREV_STEP_INDEX>
+              <PROGRAM>Picardi FixMateInformation</PROGRAM>
+              <VERSION></VERSION>
+              <NOTES>java -jar picard-tools/FixMateInformation.jar INPUT=accepted_hits.bam ASSUME_SORTED=false VALIDATION_STRINGENCY=LENIENT TMP_DIR=</NOTES>
+            </PIPE_SECTION>
+            <PIPE_SECTION section_name="merge">
+              <STEP_INDEX>merge</STEP_INDEX>
+              <PREV_STEP_INDEX>fix_mates</PREV_STEP_INDEX>
+              <PROGRAM>samtools merge</PROGRAM>
+              <VERSION>0.1.19</VERSION>
+              <NOTES>samtools merge - accepted_hits.bam unmapped.bam</NOTES>
+            </PIPE_SECTION>
+            <PIPE_SECTION section_name="bam_sort">
+              <STEP_INDEX>bam_sort</STEP_INDEX>
+              <PREV_STEP_INDEX>merge</PREV_STEP_INDEX>
+              <PROGRAM>samtools sort</PROGRAM>
+              <VERSION>0.1.19</VERSION>
+              <NOTES>samtools sort - "final.bam"</NOTES>
+            </PIPE_SECTION>
+          </PIPELINE>
+          <DIRECTIVES>
+            <alignment_includes_unaligned_reads>true</alignment_includes_unaligned_reads>
+            <alignment_marks_duplicate_reads>false</alignment_marks_duplicate_reads>
+            <alignment_includes_failed_reads>false</alignment_includes_failed_reads>
+          </DIRECTIVES>
+        </PROCESSING>
+      </REFERENCE_ALIGNMENT>
+    </ANALYSIS_TYPE>
+    <DATA_BLOCK name="data_block">
+      <FILES>
+        <FILE checksum="0dedc085f30ef9d4894e32f728ebf267" checksum_method="MD5" filename="PCAWG.94f8d946-a92e-4d2b-9f29-8e10f4274efe.bam" filetype="bam"/>
+      </FILES>
+    </DATA_BLOCK>
+    <ANALYSIS_ATTRIBUTES>
+      <ANALYSIS_ATTRIBUTE>
+        <TAG>STUDY</TAG>
+        <VALUE>PCAWG 2.0</VALUE>
+      </ANALYSIS_ATTRIBUTE>
+      <ANALYSIS_ATTRIBUTE>
+        <TAG>workflow_name</TAG>
+        <VALUE>Workflow_Bundle_TOPHAT2 (UCSC)</VALUE>
+      </ANALYSIS_ATTRIBUTE>
+      <ANALYSIS_ATTRIBUTE>
+        <TAG>workflow_version</TAG>
+        <VALUE>0.1</VALUE>
+      </ANALYSIS_ATTRIBUTE>
+      <ANALYSIS_ATTRIBUTE>
+        <TAG>workflow_source_url</TAG>
+        <VALUE>https://github.com/kellrott/tcga_realign</VALUE>
+      </ANALYSIS_ATTRIBUTE>
+      <ANALYSIS_ATTRIBUTE>
+        <TAG>workflow_bundle_url</TAG>
+        <VALUE>NA</VALUE>
+      </ANALYSIS_ATTRIBUTE>
+      <ANALYSIS_ATTRIBUTE>
+        <TAG>TOPHAT2_version</TAG>
+        <VALUE>2.0.10</VALUE>
+      </ANALYSIS_ATTRIBUTE>
+    </ANALYSIS_ATTRIBUTES>
+  </ANALYSIS>
+</ANALYSIS_SET>
