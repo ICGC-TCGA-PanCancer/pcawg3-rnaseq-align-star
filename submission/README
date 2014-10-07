@@ -1,0 +1,31 @@
+Scripts and supporting template metadata XML files to generate, validate and submit the metadata for PCAWG RNA-Seq realigned BAMs to CGHub; and also to upload the BAMs themselves.
+
+NOTE: no special Perl or Python modules should be needed, but both executables are expected to be on the running PATH.
+Further, two CGHub programs are required:
+
+1) cgsubmit
+2) gtupload
+
+you can download them here:
+https://cghub.ucsc.edu/software/submitters.html
+
+The script expects both to be in the running PATH, if not, you will need to modify pcawg_rnaseq_update_metadata.pl.
+
+This method keeps the experiment.xml and run.xml files the same as the original ones as nothing relating to the sequencing has changed.  A new analysis.xml will be generated from the template file passed in and from substituting in the filename and MD5 checksum which are also passed in.
+
+to run:
+perl pcawg_rnaseq_update_metadata.pl <path_to_analsyis_template.xml> <list_file> <path_to_cghub_upload_key_file>
+
+where:
+
+<path_to_analsyis_template.xml>
+is the path to the appropriate analysis.xml template file,
+currently either analysis.pcawg_rnaseq.TOPHAT2_template.xml or analysis.pcawg_rnaseq.STAR_template.xml.
+
+<list_file>
+must be a tab delimited file made up of one or more lines following this format:
+<original_cghub_analysis_id>	<full_path_to_new_BAM_file>	<MD5_checksum_of_new_BAM_file>
+Each line is processed in sequence, so that if the full submit->upload behavior is required, it will go through each, one at a time.  If a large number of file need to be uploaded, it is recommended that this list file be split up into multiple subsets and run in parallel.  If none of the list caused an error, at the end of the entire run of the list, a <file_list>.id_map.tsv file will be generated and written to the local directory.  It records the mapping between the original analysis ids in the list file and the new ones generated and (optionally) submitted to CGHub.
+
+<path_to_cghub_upload_key_file>
+is the path to the issued CGHub PCAWG upload key file, which is only required if you want to actually submit the metadata and do a gtupload.  if only doing a test run and/or only validating the metadata, this is not required.  If submitted, a log file for each new anlaysis id generated will be written to the working directory as <new_analysis_id>.gtupload to log the gtupload output.
