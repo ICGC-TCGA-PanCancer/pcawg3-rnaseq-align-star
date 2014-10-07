@@ -7,9 +7,6 @@ use strict;
 my $CGSUBMIT='cgsubmit';
 my $GTUPLOAD='gtupload';
 
-#key file needed for submissions and upload
-my $CGHUB_UPLOAD_KEY = '/cghub/home/cwilks/UCSC_PAWG.key';
-
 #metadata constants
 my $RUN_LABELS='<RUN_LABELS>';
 my $RUN_LABELS_STOP='<\/RUN_LABELS>';
