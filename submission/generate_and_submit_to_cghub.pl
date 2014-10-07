@@ -106,7 +106,7 @@ sub synthesize_new_analysis()
 	#copy the original metadata into the new directory
 	run_command("rsync -av $original_analysis_id/*.xml $new_analysis_id/");
 	#link in the new realigned file into the new directory
-	run_command("ln -s $filepath $new_analysis_id/");
+	run_command("ln -s $filepath $new_analysis_id/PCAWG.$filename");
 	
 	open(TEMPLATE,"<$templateF");
 	open(OUT,">$new_analysis_id/analysis.xml");
