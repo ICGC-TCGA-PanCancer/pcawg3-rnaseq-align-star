@@ -39,7 +39,7 @@ sub main()
 		chomp($line);
 		my ($original_analysis_id,$new_filepath,$new_md5) = split(/\t/,$line);
 		#dump original metadata
-		run_command("python dump_all_metadata.py $original_analysis_id",$STDOUT_FILE,$STDERR_FILE);
+		run_command("dump_all_metadata.py $original_analysis_id",$STDOUT_FILE,$STDERR_FILE);
 		#exract original metadata still relevant to PCAWG metadata
 		my $md_lines = extract_old_metadata_elements($original_analysis_id);
 		#create new metadata package from old metadata bits and template
@@ -61,6 +61,7 @@ sub main()
 	}
 	close(IN);
 	open(IDS,">$file_list.id_map.tsv");
+	print IDS "old_analysis_id\tnew_analysis_id\n";
 	foreach my $a (@id_map)
 	{
 		my ($old,$new)=@$a;
@@ -120,7 +121,7 @@ sub synthesize_new_analysis()
 		if($line =~ /<FILE/)
 		{
 			$line =~ s/checksum="[^"]*"/checksum="$md5"/;
-			$line =~ s/filename="[^"]*"/filename="$filename"/;
+			$line =~ s/filename="[^"]*"/filename="PCAWG.$filename"/;
 			$line =~ s/filetype="[^"]*"/filetype="bam"/;
 		}
 		if($line =~ /$FAILED_READS/)

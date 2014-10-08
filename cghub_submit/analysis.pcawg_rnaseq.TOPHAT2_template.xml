@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ANALYSIS_SET xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.ncbi.nlm.nih.gov/viewvc/v1/trunk/sra/doc/SRA_1-5/SRA.analysis.xsd?view=co">
-  <ANALYSIS alias="PCAWG.94f8d946-a92e-4d2b-9f29-8e10f4274efe.bam" analysis_date="2014-08-02T21:48:26.320095" center_name="UCSC">
+  <ANALYSIS alias="PCAWG.94f8d946-a92e-4d2b-9f29-8e10f4274efe.bam" analysis_date="2014-08-02T21:48:26.320095" center_name="MSKCC">
     <TITLE>TCGA/ICGC PanCancer RNA-Seq realignment</TITLE>
     <STUDY_REF refcenter="UCSC" refname="PCAWG_TEST">
     </STUDY_REF>
-    <DESCRIPTION>UCSC Tophat2 realignment of TCGA RNA-Seq data from matching participants from the PanCan Analysis of Whole Genomes (PCAWG) study</DESCRIPTION>
+    <DESCRIPTION>Tophat2 realignment of TCGA RNA-Seq data from matching participants from the PanCan Analysis of Whole Genomes (PCAWG) study</DESCRIPTION>
     <ANALYSIS_TYPE>
       <REFERENCE_ALIGNMENT>
         <ASSEMBLY>
@@ -149,7 +149,7 @@
       </ANALYSIS_ATTRIBUTE>
       <ANALYSIS_ATTRIBUTE>
         <TAG>workflow_name</TAG>
-        <VALUE>Workflow_Bundle_TOPHAT2 (UCSC)</VALUE>
+        <VALUE>Workflow_Bundle_TOPHAT2</VALUE>
       </ANALYSIS_ATTRIBUTE>
       <ANALYSIS_ATTRIBUTE>
         <TAG>workflow_version</TAG>
@@ -157,7 +157,7 @@
       </ANALYSIS_ATTRIBUTE>
       <ANALYSIS_ATTRIBUTE>
         <TAG>workflow_source_url</TAG>
-        <VALUE>https://github.com/kellrott/tcga_realign</VALUE>
+        <VALUE>https://github.com/kellrott/icgc_rnaseq_align</VALUE>
       </ANALYSIS_ATTRIBUTE>
       <ANALYSIS_ATTRIBUTE>
         <TAG>workflow_bundle_url</TAG>

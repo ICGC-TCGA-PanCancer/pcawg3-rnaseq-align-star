@@ -1,6 +1,8 @@
 Scripts and supporting template metadata XML files to generate, validate and submit the metadata for PCAWG RNA-Seq realigned BAMs to CGHub; and also to upload the BAMs themselves.
 
-NOTE: no special Perl or Python modules should be needed, but both executables are expected to be on the running PATH.
+NOTE: no special Perl modules are needed and only lxml for Python should be needed.
+Both Perl and Python executables are expected to be on the running PATH.
+
 Further, two CGHub programs are required:
 
 1) cgsubmit
