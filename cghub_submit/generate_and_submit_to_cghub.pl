@@ -2,6 +2,7 @@
 #modifies TCGA rnaseq metadata to be PCAWG 2.0 rnaseq metadata v0.1
 #and does the submissiona and upload of the new realignments to CGHub
 use strict;
+use warnings;
 
 #programs
 my $CGSUBMIT='cgsubmit';
@@ -17,9 +18,6 @@ my $FAILED_READS='(<alignment_includes_failed_reads>.+<\/alignment_includes_fail
 my $date = `date +%Y-%m-%dT%T`;
 chomp($date);
 
-#temporary output files, will be deleted if script finishes successfully
-my $STDOUT_FILE="$0.stdout.$date";
-my $STDERR_FILE="$0.stderr.$date";
 
 #args
 my $template_analysis_xml = shift;
@@ -28,7 +26,9 @@ die "must submit an analysis.xml template file AND a list of uuids,filenames, an
 #optional, if not passed in, we don't submit
 my $submit_key = shift;
 
-main();
+#temporary output files, will be deleted if script finishes successfully
+my $STDOUT_FILE="$file_list.stdout.$date";
+my $STDERR_FILE="$file_list.stderr.$date";
 
 sub main()
 {
@@ -221,3 +221,5 @@ sub run_command
 	
 	return join("\n",@output);	
 }	
+
+main();
