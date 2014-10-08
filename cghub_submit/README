@@ -9,12 +9,12 @@ Further, two CGHub programs are required:
 you can download them here:
 https://cghub.ucsc.edu/software/submitters.html
 
-The script expects both to be in the running PATH, if not, you will need to modify pcawg_rnaseq_update_metadata.pl.
+The script expects both to be in the running PATH, if not, you will need to modify generate_and_submit_to_cghub.pl.
 
 This method keeps the experiment.xml and run.xml files the same as the original ones as nothing relating to the sequencing has changed.  A new analysis.xml will be generated from the template file passed in and from substituting in the filename and MD5 checksum which are also passed in.
 
 to run:
-perl pcawg_rnaseq_update_metadata.pl <path_to_analsyis_template.xml> <list_file> <path_to_cghub_upload_key_file>
+perl generate_and_submit_to_cghub.pl <path_to_analsyis_template.xml> <list_file> <path_to_cghub_upload_key_file>
 
 where:
 
