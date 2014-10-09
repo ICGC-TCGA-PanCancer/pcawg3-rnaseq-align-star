@@ -1,6 +1,52 @@
-Scripts and supporting template metadata XML files to generate, validate and submit the metadata for PCAWG RNA-Seq realigned BAMs to CGHub; and also to upload the BAMs themselves.
+Scripts and supporting template metadata XML files to generate, 
+validate and submit the metadata for PCAWG RNA-Seq realigned BAMs 
+to CGHub; and also to upload the BAMs themselves.
 
-NOTE: no special Perl modules are needed and only lxml for Python should be needed.
+This method keeps the experiment.xml and run.xml files the same
+as the original ones as nothing relating to the sequencing has changed.
+A new analysis.xml will be generated from the template file passed 
+in and from substituting in the filename and MD5 checksum which are also passed in.
+
+to run (generically) using the Dockerfile:
+
+sudo docker run -i -t --rm -v /path/to/data:/data -v /path/to/keys/:/keys cghub_submit /bin/bash
+
+generate_and_submit_to_cghub.pl /opt/analysis.pcawg_rnaseq.TOPHAT2_template.xml /data/<bam_list_file> /key/<pcawg_upload_key_file>.key
+
+where /data should be the place where the bams are and /data/<bam_list_file>
+should contain at least one line formatted like this:
+<original_cghub_analysis_id>TAB</data/bam_file_name>TAB<bam_file_md5_checksum>
+
+Example line:
+4a863729-23fd-4d2f-9ff5-e28b43c67de9    /data/test.bam    7e45fb0ef85576fceb97ec89b5894710
+
+note that the 2nd field must reference the mounted filepath on the
+docker image (as I have here), not the original full path to the bam
+file.
+
+Use can use either analysis.pcawg_rnaseq.TOPHAT2_template.xml or 
+analysis.pcawg_rnaseq.STAR_template.xml depending on which aligner was used.
+
+The default CGHub study/project that these are setup to upload to
+is "PCAWG_TEST" for the time being.  This can be changed later.
+
+Also /data needs to be writable by the docker instance.
+
+The script will write out an analysis_id map file 
+(located at /data/<bam_list_file>.id_map.tsv) which maps original analysis_id
+and the newly generated one which is what will identifiy the uploaded file in CGHub.
+
+Here's an actual example which will work on UCSC's pod cluster environment (validates submission
+xml, but doesn't actually submit/upload):
+
+sudo docker run -i -t --rm -v /pod/home/cwilks/p/icgc_rnaseq_align:/test -v /pod/home/kellrott/keys/:/keys cghub_submit /bin/bash
+
+generate_and_submit_to_cghub.pl /opt/analysis.pcawg_rnaseq.TOPHAT2_template.xml /test/uuids
+
+
+If you're not using the Dockerfile, you may find this relevant if running the script:
+
+No special Perl modules are needed and only lxml for Python should be needed.
 Both Perl and Python executables are expected to be on the running PATH.
 
 Further, two CGHub programs are required:
@@ -11,23 +57,5 @@ Further, two CGHub programs are required:
 you can download them here:
 https://cghub.ucsc.edu/software/submitters.html
 
-The script expects both to be in the running PATH, if not, you will need to modify generate_and_submit_to_cghub.pl.
-
-This method keeps the experiment.xml and run.xml files the same as the original ones as nothing relating to the sequencing has changed.  A new analysis.xml will be generated from the template file passed in and from substituting in the filename and MD5 checksum which are also passed in.
-
-to run:
-perl generate_and_submit_to_cghub.pl <path_to_analsyis_template.xml> <list_file> <path_to_cghub_upload_key_file>
-
-where:
-
-<path_to_analsyis_template.xml>
-is the path to the appropriate analysis.xml template file,
-currently either analysis.pcawg_rnaseq.TOPHAT2_template.xml or analysis.pcawg_rnaseq.STAR_template.xml.
-
-<list_file>
-must be a tab delimited file made up of one or more lines following this format:
-<original_cghub_analysis_id>	<full_path_to_new_BAM_file>	<MD5_checksum_of_new_BAM_file>
-Each line is processed in sequence, so that if the full submit->upload behavior is required, it will go through each, one at a time.  If a large number of file need to be uploaded, it is recommended that this list file be split up into multiple subsets and run in parallel.  If none of the list caused an error, at the end of the entire run of the list, a <file_list>.id_map.tsv file will be generated and written to the local directory.  It records the mapping between the original analysis ids in the list file and the new ones generated and (optionally) submitted to CGHub.
-
-<path_to_cghub_upload_key_file>
-is the path to the issued CGHub PCAWG upload key file, which is only required if you want to actually submit the metadata and do a gtupload.  if only doing a test run and/or only validating the metadata, this is not required.  If submitted, a log file for each new anlaysis id generated will be written to the working directory as <new_analysis_id>.gtupload to log the gtupload output.
+The script expects both to be in the running PATH, 
+if not, you will need to modify generate_and_submit_to_cghub.pl.
