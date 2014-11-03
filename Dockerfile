@@ -15,6 +15,7 @@ RUN     mkdir /usr/local/include/bam
 RUN     cp /opt/samtools-0.1.19/*.h /usr/local/include/bam/
 RUN     cd /opt/tophat-2.0.12 && ./configure --prefix=/opt --with-boost-libdir=/usr/lib/x86_64-linux-gnu/ && make && make install
 
-RUN     wget https://github.com/alexdobin/STAR/archive/STAR_2.4.0d.tar.gz
-RUN     tar xvzf STAR_2.4.0d.tar.gz
-RUN     cd /opt/STAR-STAR_2.4.0d && make
+RUN     wget https://github.com/alexdobin/STAR/archive/STAR_2.4.0f1.tar.gz
+RUN     tar xvzf STAR_2.4.0f1.tar.gz
+RUN     cd /opt/STAR-STAR_2.4.0f1 && make
+RUN     cp bin/Linux_x86_64/STAR /usr/local/bin/
