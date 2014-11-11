@@ -55,22 +55,22 @@ def scan_workdir(base):
     ### unzipped input
     fastq_files = glob(os.path.join(base, "*.fastq"))
     if len(fastq_files):
-        return ( 'cat', list( (os.path.basename(i), "%s.fastq" % i) for i in fastq_files), 'SE') 
+        return ( 'cat', list( (os.path.basename(re.sub(r'.fastq$', '', i)), i) for i in fastq_files), 'SE') 
 
     ### gzipped input
     fastq_files = glob(os.path.join(base, "*.fastq.gz"))
     if len(fastq_files):
-        return ( 'zcat', list( (os.path.basename(i), "%s.fastq.gz" % i) for i in fastq_files), 'SE') 
+        return ( 'zcat', list( (os.path.basename(re.sub(r'.fastq.gz$', '', i)), i) for i in fastq_files), 'SE') 
 
     ### bnzipped input
     fastq_files = glob(os.path.join(base, "*.fastq.bz"))
     if len(fastq_files):
-        return ( 'bzcat', list( (os.path.basename(i), "%s.fastq.bz" % i) for i in fastq_files), 'SE') 
+        return ( 'bzcat', list( (os.path.basename(re.sub(r'.fastq.bz$', '', i)), i) for i in fastq_files), 'SE') 
 
     raise Exception("Unable to determine input type")
 
 
-def xml2RGline(xmlfile):
+def xml2RGdict(xmlfile):
     
     ### read xml in
     root = etree.parse(xmlfile)
@@ -87,7 +87,22 @@ def xml2RGline(xmlfile):
     platform = rtree.find('experiment_xml/EXPERIMENT_SET/EXPERIMENT/PLATFORM').getchildren()[0].tag 
     instrument = rtree.find('experiment_xml/EXPERIMENT_SET/EXPERIMENT/PLATFORM/*/INSTRUMENT_MODEL').text
 
-    return '"' + '\t'.join(['ID:%s:%s' % (center, analysis_id), 'CN:%s' % center, 'DT:%s' % date_string, 'LB:RNA-Seq:%s:%s' % (center, library_id), 'PL:%s' % platform, 'PM:%s' % instrument, 'SM:%s' % analysis_id]) + '"'
+    ### build dictionary
+    RG_dict = { 'ID' : '%s:%s' % (center, analysis_id),
+                'CN' : center,
+                'DT' : date_string,
+                'LB' : 'RNA-Seq:%s:%s' % (center, library_id),
+                'PL' : platform,
+                'PM' : instrument,
+                'SM' : analysis_id}
+
+    ### collect read group labels and add them to dict
+    RG_dict['RG'] = []
+    for x in rtree.find('analysis_xml/ANALYSIS_SET/ANALYSIS/ANALYSIS_TYPE/REFERENCE_ALIGNMENT/RUN_LABELS').getchildren():
+        RG_dict['RG'].append(x.attrib['read_group_label'])
+        
+    return RG_dict
+    #return '"' + '\t'.join(['ID:%s:%s' % (center, analysis_id), 'CN:%s' % center, 'DT:%s' % date_string, 'LB:RNA-Seq:%s:%s' % (center, library_id), 'PL:%s' % platform, 'PM:%s' % instrument, 'SM:%s' % analysis_id]) + '"'
 
 
 
@@ -101,6 +116,8 @@ if __name__ == "__main__":
     optional = parser.add_argument_group("optional input parameters")
     optional.add_argument("--out", default="out.bam", help="Name of the output BAM file")
     optional.add_argument("--workDir", default="./", help="Work directory")
+    optional.add_argument("--keepJunctions", default=False, action='store_true', help="keeps the junction file as {--out}.junctions")
+    optional.add_argument("--useTMP", default=None, help="environment variable that is used as prefix for temprary data")
     optional.add_argument("-h", "--help", action='store_true', help="show this help message and exit")
     star = parser.add_argument_group("STAR input parameters")
     star.add_argument("--runThreadN", type=int, default=4, help="Number of threads")
@@ -114,6 +131,8 @@ if __name__ == "__main__":
     star.add_argument("--genomeLoad", default="NoSharedMemory", help="genomeLoad")
     star.add_argument("--outFilterMatchNminOverLread", type=float, default=0.33, help="outFilterMatchNminOverLread")
     star.add_argument("--outFilterScoreMinOverLread", type=float, default=0.33, help="outFilterScoreMinOverLread")
+    star.add_argument("--twopass1readsN", type=int, default=0, help="twopass1readsN (-1 means all reads are used for remapping)")
+    star.add_argument("--sjdbOverhang", type=int, default=100, help="sjdbOverhang (only necessary for two-pass mode)")
     star.add_argument("--outSAMstrandField", default="intronMotif", help="outSAMstrandField")
     star.add_argument("--outSAMattributes", default=["NH", "HI", "NM", "MD", "AS", "XS"], help="outSAMattributes")
     star.add_argument("--outSAMunmapped", default="Within", help="outSAMunmapped")
@@ -131,8 +150,11 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     ### handling of input file (unpacking, etc. )
-    created_input_dir = False
-    workdir = tempfile.mkdtemp(dir=args.workDir, prefix="star_inputdir_")
+    #created_input_dir = False
+    if args.useTMP is not None:
+        workdir = tempfile.mkdtemp(dir=os.environ[args.useTMP], prefix="star_inputdir_")
+    else:
+        workdir = tempfile.mkdtemp(dir=args.workDir, prefix="star_inputdir_")
     if args.tarFileIn.endswith(".gz"):
         tarcmd = "tar xvzf %s -C %s" % (args.tarFileIn, workdir)
     elif args.tarFileIn.endswith(".bz"):
@@ -140,8 +162,6 @@ if __name__ == "__main__":
     elif args.tarFileIn.endswith(".tar"):
         tarcmd = "tar xvf %s -C %s" % (args.tarFileIn, workdir)
     subprocess.check_call(tarcmd, shell=True)
-    #args.dirIn = os.path.abspath(workdir)
-    created_input_dir = True
     
     ### collect fastq information from extraction dir
     align_sets = scan_workdir(os.path.abspath(workdir))
@@ -165,14 +185,14 @@ if __name__ == "__main__":
 --readFilesCommand ${readFilesCommand} \
 --outFilterMatchNminOverLread ${outFilterMatchNminOverLread} \
 --outFilterScoreMinOverLread ${outFilterScoreMinOverLread} \
+--twopass1readsN ${twopass1readsN} \
+--sjdbOverhang ${sjdbOverhang} \
 --outSAMstrandField ${outSAMstrandField} \
 --outSAMattributes ${outSAMattributes} \
 --outSAMunmapped ${outSAMunmapped} \
 --outSAMtype ${outSAMtype} \
 --outSAMheaderHD ${outSAMheaderHD}""" % read_str
 
-    #out_dirs = []
-    #for pair in align_sets[1]:
     cmd = string.Template(align_template_str).safe_substitute({
         'genomeDir' : os.path.abspath(args.genomeDir),
         'runThreadN' : args.runThreadN,
@@ -188,6 +208,8 @@ if __name__ == "__main__":
         'readFilesCommand' : align_sets[0],
         'outFilterMatchNminOverLread' : args.outFilterMatchNminOverLread,
         'outFilterScoreMinOverLread' : args.outFilterScoreMinOverLread,
+        'twopass1readsN' : args.twopass1readsN,
+        'sjdbOverhang' : args.sjdbOverhang,
         'outSAMstrandField' : args.outSAMstrandField,
         'outSAMattributes' : " ".join(args.outSAMattributes),
         'outSAMunmapped' : args.outSAMunmapped, 
@@ -198,37 +220,73 @@ if __name__ == "__main__":
         cmd = string.Template(cmd).substitute({
             'fastq_right' : ','.join([os.path.join(x[0], x[2]) for x in align_sets[1]]) # os.path.abspath(pair[2]),
         })
+
+    ### process read group information
     rg_added = False
     if args.outSAMattrRGline is not None:
-        cmd += " --outSAMattrRGline %s" % (" ".join(args.outSAMattrRGline))
+        RG_dict = dict([(x.split(':', 1)[0], x.split(':', 1)[1]) for x in args.outSAMattrRGline.split()])
         rg_added = True
     if args.outSAMattrRGfile is not None:
         if not os.path.exists(args.outSAMattrRGfile):
             print >> sys.stderr, 'WARNING: %s does not exists - ignoring!'
         else:
             _fh = open(args.outSAMattrRGfile, 'r')
-            cmd += " --outSAMattrRGline %s" % _fh.next().strip()
+            RG_dict = dict([(x.split(':', 1)[0], x.split(':', 1)[1]) for x in _fh.next().strip().split()])
             _fh.close()
             rg_added = True
     if args.outSAMattrRGxml is not None:
         if not os.path.exists(args.outSAMattrRGxml):
             print >> sys.stderr, 'WARNING: %s does not exists - ignoring!'
         else:
-            cmd += ' --outSAMattrRGline %s' % xml2RGline(args.outSAMattrRGxml)
+            RG_dict = xml2RGdict(args.outSAMattrRGxml)
+            assert (len(align_sets[1]) == len(RG_dict['RG'])), 'Number of input file (pairs) does not match read groups in given RUN-xml' 
             rg_added = True
     if not rg_added:
-        cmd += " --outSAMattrRGline @RG\tID:%s\tSM:%s" % (pair[0], pair[0])        
+        RG_dict = {'ID' : '', 'SM' : ''}
 
-    align_dir = os.path.abspath( tempfile.mkdtemp(dir=args.workDir, prefix="star_aligndir_") )
+    ### post-process RG-dict to comply with STAR conventions
+    for key in RG_dict:
+        sl = RG_dict[key].split(' ')
+        if len(sl) > 1:
+            RG_dict[key] = '"%s"' % RG_dict[key]
+
+    ### convert RG_dict into formatted RG line
+    RG_line = []
+    for r, readgroup in enumerate(align_sets[1]):
+        if 'RG' in RG_dict:
+            tmp = 'ID:%s:%s' % (RG_dict['ID'], RG_dict['RG'][r])
+        else:
+            tmp = 'ID:%s:%s' % (RG_dict['ID'], readgroup[0])
+        if len(RG_dict) > 1:
+            tmp += '\t'
+            tmp += '\t'.join(['%s:%s' % (key, RG_dict[key]) for key in RG_dict if key not in ['ID', 'RG']])
+        ### add read group label
+        if 'RG' in RG_dict and 'CN' in RG_dict:
+            tmp += '\tPU:%s:%s' % (RG_dict['CN'], RG_dict['RG'][r])
+        RG_line.append('%s' % tmp)
+    cmd += ' --outSAMattrRGline %s' % ' , '.join(RG_line)
+
+    ### take temp directory from environment variable
+    if args.useTMP is not None:
+        align_dir = os.path.abspath( tempfile.mkdtemp(dir=os.environ[args.useTMP], prefix="star_aligndir_") )
+    else:
+        align_dir = os.path.abspath( tempfile.mkdtemp(dir=args.workDir, prefix="star_aligndir_") )
     print "Running", cmd
     subprocess.check_call(cmd, shell=True, cwd=align_dir)
 
-    #out_dirs.append(align_dir)
-    
-    #cmd = "samtools merge -r -@ 8 %s %s" % (os.path.abspath(args.out), " ".join(out_dirs))
-    #print "Running", cmd
-    #subprocess.check_call(cmd, shell=True, cwd=align_dir)
-        
-    #if created_input_dir:
-    #   shutil.rmtree(args.dirIn)
+    ### move output file
+    if 'BAM' in args.outSAMtype and 'SortedByCoordinate' in args.outSAMtype:
+        shutil.move(os.path.join(align_dir, 'Aligned.sortedByCoord.out.bam'), args.out)
+    elif 'BAM' in args.outSAMtype and 'Unsorted' in args.outSAMtype:
+        shutil.move(os.path.join(align_dir, 'Aligned.out.bam'), args.out)
+    else:
+        raise Exception('STAR output file could not be determined') 
+
+    ### move junctions if to be kept
+    if args.keepJunctions:
+        shutil.move(os.path.join(align_dir, 'SJ.out.tab'), args.out + '.junctions')
+
+    ### clean up working directory
+    shutil.rmtree(workdir)
+    shutil.rmtree(align_dir)
     
