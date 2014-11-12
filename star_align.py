@@ -171,7 +171,7 @@ if __name__ == "__main__":
     else:
         read_str = '${fastq_left}'
     
-    align_template_str = """/cbio/grlab/share/software/STAR/2.4.0f1/bin/Linux_x86_64/STAR \
+    align_template_str = """STAR \
 --genomeDir ${genomeDir} --readFilesIn %s \
 --runThreadN ${runThreadN} \
 --outFilterMultimapScoreRange ${outFilterMultimapScoreRange} \
@@ -246,6 +246,8 @@ if __name__ == "__main__":
 
     ### post-process RG-dict to comply with STAR conventions
     for key in RG_dict:
+        if key == 'RG':
+            continue
         sl = RG_dict[key].split(' ')
         if len(sl) > 1:
             RG_dict[key] = '"%s"' % RG_dict[key]
