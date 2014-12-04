@@ -83,6 +83,8 @@ def xml2RGdict(xmlfile):
         date_string = rtree.find('analysis_xml/ANALYSIS_SET/ANALYSIS').attrib['analysis_date']
     except KeyError:
         date_string = rtree.find('run_xml/RUN_SET/RUN').attrib['run_date']
+    sample_id = rtree.find('sample_id').text
+    submitter_id = rtree.find('legacy_sample_id').text
     library_id = rtree.find('experiment_xml/EXPERIMENT_SET/EXPERIMENT').attrib['alias']
     platform = rtree.find('experiment_xml/EXPERIMENT_SET/EXPERIMENT/PLATFORM').getchildren()[0].tag 
     instrument = rtree.find('experiment_xml/EXPERIMENT_SET/EXPERIMENT/PLATFORM/*/INSTRUMENT_MODEL').text
@@ -94,7 +96,8 @@ def xml2RGdict(xmlfile):
                 'LB' : 'RNA-Seq:%s:%s' % (center, library_id),
                 'PL' : platform,
                 'PM' : instrument,
-                'SM' : analysis_id}
+                'SM' : sample_id,
+                'SI' : submitter_id}
 
     ### collect read group labels and add them to dict
     RG_dict['RG'] = []
@@ -102,8 +105,6 @@ def xml2RGdict(xmlfile):
         RG_dict['RG'].append(x.attrib['read_group_label'])
         
     return RG_dict
-    #return '"' + '\t'.join(['ID:%s:%s' % (center, analysis_id), 'CN:%s' % center, 'DT:%s' % date_string, 'LB:RNA-Seq:%s:%s' % (center, library_id), 'PL:%s' % platform, 'PM:%s' % instrument, 'SM:%s' % analysis_id]) + '"'
-
 
 
 if __name__ == "__main__":
@@ -112,7 +113,6 @@ if __name__ == "__main__":
     required = parser.add_argument_group("Required input parameters")
     required.add_argument("--genomeDir", default=None, help="Directory containing the reference genome index", required=True)
     required.add_argument("--tarFileIn", default=None, help="Input file containing the sequence information", required=True)
-    #required.add_argument("--source", default=None, help="Source study the study is taken from (tcga or icgc)", required=True)
     optional = parser.add_argument_group("optional input parameters")
     optional.add_argument("--out", default="out.bam", help="Name of the output BAM file")
     optional.add_argument("--workDir", default="./", help="Work directory")
@@ -150,7 +150,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     ### handling of input file (unpacking, etc. )
-    #created_input_dir = False
     if args.useTMP is not None:
         workdir = tempfile.mkdtemp(dir=os.environ[args.useTMP], prefix="star_inputdir_")
     else:
@@ -261,12 +260,28 @@ if __name__ == "__main__":
             tmp = 'ID:%s:%s' % (RG_dict['ID'], readgroup[0])
         if len(RG_dict) > 1:
             tmp += '\t'
-            tmp += '\t'.join(['%s:%s' % (key, RG_dict[key]) for key in RG_dict if key not in ['ID', 'RG']])
+            tmp += '\t'.join(['%s:%s' % (key, RG_dict[key]) for key in RG_dict if key not in ['ID', 'RG', 'SI']])
         ### add read group label
         if 'RG' in RG_dict and 'CN' in RG_dict:
             tmp += '\tPU:%s:%s' % (RG_dict['CN'], RG_dict['RG'][r])
         RG_line.append('%s' % tmp)
     cmd += ' --outSAMattrRGline %s' % ' , '.join(RG_line)
+
+    ### handle comment lines
+    if 'SI' in RG_dict:
+        if args.useTMP is not None:
+            comment_file = os.path.abspath( tempfile.mkstemp(dir=os.environ[args.useTMP], prefix="star_comments_")[1] )
+        else:
+            comment_file = os.path.abspath( tempfile.mkstemp(dir=args.workDir, prefix="star_comments_")[1] )
+        
+        fd_com = open(comment_file, 'w')
+        fd_com.write('@CO\tsubmitter_sample_id:%s\n' % RG_dict['SI'])
+
+        fd_com.flush()
+        fd_com.close()
+        
+        cmd += ' --outSAMheaderCommentFile %s' % comment_file
+
 
     ### take temp directory from environment variable
     if args.useTMP is not None:
