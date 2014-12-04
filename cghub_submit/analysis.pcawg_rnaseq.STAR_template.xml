@@ -104,15 +104,8 @@
               <STEP_INDEX>mapping</STEP_INDEX>
               <PREV_STEP_INDEX>NIL</PREV_STEP_INDEX>
               <PROGRAM>STAR</PROGRAM>
-              <VERSION>2.4.0b</VERSION>
+              <VERSION>2.4.0f1</VERSION>
               <NOTES>STAR --genomeDir hg19_GRCh37.p13_STAR_gencode19.overhang100 --readFilesIn left.fastq right.fastq --runThreadN runThreadN --outFilterMultimapScoreRange 1 --outFilterMultimapNmax 20 --outFilterMismatchNmax 10 --alignIntronMax 500000 --alignMatesGapMax 1000000 --sjdbScore 2 --alignSJDBoverhangMin 1 --genomeLoad NoSharedMemory --readFilesCommand bzcat --outFilterMatchNminOverLread 0.33 --outFilterScoreMinOverLread 0.33 --outSAMstrandField intronMotif --outSAMattributes NH HI NM MD AS XS --outSAMunmapped Within --outSAMtype BAM Unsorted</NOTES>
-            </PIPE_SECTION>
-            <PIPE_SECTION section_name="bam_sort">
-              <STEP_INDEX>bam_sort</STEP_INDEX>
-              <PREV_STEP_INDEX>mapping</PREV_STEP_INDEX>
-              <PROGRAM>samtools sort</PROGRAM>
-              <VERSION>0.1.19</VERSION>
-              <NOTES>samtools sort - "final.bam"</NOTES>
             </PIPE_SECTION>
           </PIPELINE>
           <DIRECTIVES>
@@ -143,7 +136,7 @@
       </ANALYSIS_ATTRIBUTE>
       <ANALYSIS_ATTRIBUTE>
         <TAG>workflow_source_url</TAG>
-        <VALUE>https://github.com/kellrott/icgc_rnaseq_align</VALUE>
+        <VALUE>https://github.com/ucscCancer/icgc_rnaseq_align</VALUE>
       </ANALYSIS_ATTRIBUTE>
       <ANALYSIS_ATTRIBUTE>
         <TAG>workflow_bundle_url</TAG>
@@ -151,7 +144,7 @@
       </ANALYSIS_ATTRIBUTE>
       <ANALYSIS_ATTRIBUTE>
         <TAG>STAR_version</TAG>
-        <VALUE>2.4.0b</VALUE>
+        <VALUE>2.4.0f1</VALUE>
       </ANALYSIS_ATTRIBUTE>
     </ANALYSIS_ATTRIBUTES>
   </ANALYSIS>

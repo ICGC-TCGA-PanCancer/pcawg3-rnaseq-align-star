@@ -37,13 +37,13 @@ sub main()
 	while(my $line = <IN>)
 	{
 		chomp($line);
-		my ($original_analysis_id,$new_filepath,$new_md5) = split(/\t/,$line);
+		my ($original_analysis_id,$new_filepath,$new_md5,$run_cmd) = split(/\t/,$line);
 		#dump original metadata
 		run_command("dump_all_metadata.py $original_analysis_id",$STDOUT_FILE,$STDERR_FILE);
 		#exract original metadata still relevant to PCAWG metadata
 		my $md_lines = extract_old_metadata_elements($original_analysis_id);
 		#create new metadata package from old metadata bits and template
-		my $new_analysis_id = synthesize_new_analysis($md_lines,$new_filepath,$new_md5,$template_analysis_xml,$original_analysis_id);
+		my $new_analysis_id = synthesize_new_analysis($md_lines,$new_filepath,$new_md5,$run_cmd,$template_analysis_xml,$original_analysis_id);
 		#do the actual validation->submission->upload
 		if(validate_new_metadata($new_analysis_id) && $submit_key)
 		{
@@ -94,7 +94,8 @@ sub upload_data()
 
 sub synthesize_new_analysis()
 {
-	my ($md_lines,$filepath,$md5,$templateF,$original_analysis_id) = @_;
+	my ($md_lines,$filepath,$md5,$run_cmd,$templateF,$original_analysis_id) = @_;
+    my @run_cmds = split(/\$/,$run_cmd);
 
  	my @f=split(/\//,$filepath);
 	my $filename = pop(@f);	
@@ -124,6 +125,8 @@ sub synthesize_new_analysis()
 			$line =~ s/filename="[^"]*"/filename="PCAWG.$filename"/;
 			$line =~ s/filetype="[^"]*"/filetype="bam"/;
 		}
+        my $tmp_cmd = join("\n", @run_cmds);
+        $line =~ s/<NOTES>.*<\/NOTES>/<NOTES>$tmp_cmd<\/NOTES>/;
 		if($line =~ /$FAILED_READS/)
 		{
 			my $cur_val = $1;
