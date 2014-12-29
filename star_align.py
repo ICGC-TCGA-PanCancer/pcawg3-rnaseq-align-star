@@ -62,12 +62,54 @@ def scan_workdir(base):
     if len(fastq_files):
         return ( 'zcat', list( (os.path.basename(re.sub(r'.fastq.gz$', '', i)), i) for i in fastq_files), 'SE') 
 
-    ### bnzipped input
+    ### bzipped input
     fastq_files = glob(os.path.join(base, "*.fastq.bz"))
     if len(fastq_files):
         return ( 'bzcat', list( (os.path.basename(re.sub(r'.fastq.bz$', '', i)), i) for i in fastq_files), 'SE') 
 
     raise Exception("Unable to determine input type")
+
+
+def spreadsheet2dict(spreadFile):
+    """
+    Takes the filename of the spreadsheet, loads the data and organizes
+    it into a dictionary"""
+
+    spreadDict = {}
+    key2field = {}
+    for l, line in enumerate(open(spreadFile)):
+        sl = line.strip().split('\t')
+        if l == 0:
+            for k, key in enumerate(sl):
+                key2field[key] = k
+        else:
+            spreadDict[sl[key2field['fastq_analysis_id']]] = sl
+    
+    return (spreadDict, key2field)
+
+
+def spreadsheet2RGdict(spreadFile, analysisID):
+    """Compiles a read group dictionary from the information
+    in the spreadFile for the given analysisID."""
+
+    sD, k2f = spreadsheet2dict(spreadFile)
+
+    try:
+        rec = sD[analysisID]
+    except KeyError:
+        raise Exception('Information for analysis ID %s could not be found in %s' % (analysisID, spreadFile))
+
+    ### build dictionary
+    RG_dict = { 'ID' : '%s:%s' % (rec[k2f['center_name']], analysisID),
+                'CN' : rec[k2f['center_name']],
+                'LB' : 'RNA-Seq:%s:%s' % (rec[k2f['center_name']], rec[k2f['lib_id']]),
+                'PL' : rec[k2f['platform']],
+                'PM' : rec[k2f['platform_model']],
+                'SM' : rec[k2f['sample_id']],
+                'SI' : rec[k2f['submitter_sample_id']],
+                'RG' : rec[k2f['read_group_label']].split(',')}
+
+    return RG_dict
 
 
 def xml2RGdict(xmlfile):
@@ -116,6 +158,8 @@ if __name__ == "__main__":
     optional = parser.add_argument_group("optional input parameters")
     optional.add_argument("--out", default="out.bam", help="Name of the output BAM file")
     optional.add_argument("--workDir", default="./", help="Work directory")
+    optional.add_argument("--metaData", default=None, help="File containing metadata for the alignment header")
+    optional.add_argument("--analysisID", default=None, help="Analysis ID to be considered in the metadata file")
     optional.add_argument("--keepJunctions", default=False, action='store_true', help="keeps the junction file as {--out}.junctions")
     optional.add_argument("--useTMP", default=None, help="environment variable that is used as prefix for temprary data")
     optional.add_argument("--weakRGcheck", action='store_true', default=False, help="only perform weak RG record check and generate generic RG ID in case of a single alignment file with multiple RG records present. Use with caution!")
@@ -150,6 +194,17 @@ if __name__ == "__main__":
         sys.exit(0)
 
     args = parser.parse_args()
+
+    ### some sanity checks on command line parameters
+    if args.metaData is not None:
+        if not os.path.exists(args.metaData):
+            raise Exception("File provided via --metaData does not exist\nFile: %s" % args.metaData)
+        if args.analysisID is None:
+            raise Exception("When providing information in a metadata file, a value for --analysisID is required")
+    if args.outSAMattrRGxml is not None and not os.path.exists(args.outSAMattrRGxml):
+        raise Exception("File provided via --outSAMattrRGxml does not exist\nFile: %s" % args.outSAMattrRGxml)
+    if args.outSAMattrRGfile is not None and not os.path.exists(args.outSAMattrRGfile):
+        raise Exception("File provided via --outSAMattrRGfile does not exist\nFile: %s" % args.outSAMattrRGfile)
 
     ### handling of input file (unpacking, etc. )
     if args.useTMP is not None:
@@ -300,25 +355,17 @@ if __name__ == "__main__":
         })
 
     ### process read group information
-    rg_added = False
-    if args.outSAMattrRGline is not None:
+    if args.metaData is not None:
+        RG_dict = spreadsheet2RGdict(args.metaData, args.analysisID) 
+    elif args.outSAMattrRGxml is not None:
+        RG_dict = xml2RGdict(args.outSAMattrRGxml)
+    elif args.outSAMattrRGline is not None:
         RG_dict = dict([(x.split(':', 1)[0], x.split(':', 1)[1]) for x in args.outSAMattrRGline.split()])
-        rg_added = True
-    if args.outSAMattrRGfile is not None:
-        if not os.path.exists(args.outSAMattrRGfile):
-            print >> sys.stderr, 'WARNING: %s does not exists - ignoring!'
-        else:
-            _fh = open(args.outSAMattrRGfile, 'r')
-            RG_dict = dict([(x.split(':', 1)[0], x.split(':', 1)[1]) for x in _fh.next().strip().split()])
-            _fh.close()
-            rg_added = True
-    if args.outSAMattrRGxml is not None:
-        if not os.path.exists(args.outSAMattrRGxml):
-            print >> sys.stderr, 'WARNING: %s does not exists - ignoring!'
-        else:
-            RG_dict = xml2RGdict(args.outSAMattrRGxml)
-            rg_added = True
-    if not rg_added:
+    elif args.outSAMattrRGfile is not None:
+        _fh = open(args.outSAMattrRGfile, 'r')
+        RG_dict = dict([(x.split(':', 1)[0], x.split(':', 1)[1]) for x in _fh.next().strip().split()])
+        _fh.close()
+    else:
         RG_dict = {'ID' : '', 'SM' : ''}
 
     ### perform sanity check on provided RG records
