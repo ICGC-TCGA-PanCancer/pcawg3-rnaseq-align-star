@@ -104,7 +104,7 @@
               <STEP_INDEX>mapping</STEP_INDEX>
               <PREV_STEP_INDEX>NIL</PREV_STEP_INDEX>
               <PROGRAM>STAR</PROGRAM>
-              <VERSION>2.4.0f1</VERSION>
+              <VERSION>2.4.0g1</VERSION>
               <NOTES>STAR --genomeDir hg19_GRCh37.p13_STAR_gencode19.overhang100 --readFilesIn left.fastq right.fastq --runThreadN runThreadN --outFilterMultimapScoreRange 1 --outFilterMultimapNmax 20 --outFilterMismatchNmax 10 --alignIntronMax 500000 --alignMatesGapMax 1000000 --sjdbScore 2 --alignSJDBoverhangMin 1 --genomeLoad NoSharedMemory --readFilesCommand bzcat --outFilterMatchNminOverLread 0.33 --outFilterScoreMinOverLread 0.33 --outSAMstrandField intronMotif --outSAMattributes NH HI NM MD AS XS --outSAMunmapped Within --outSAMtype BAM Unsorted</NOTES>
             </PIPE_SECTION>
           </PIPELINE>
@@ -144,7 +144,7 @@
       </ANALYSIS_ATTRIBUTE>
       <ANALYSIS_ATTRIBUTE>
         <TAG>STAR_version</TAG>
-        <VALUE>2.4.0f1</VALUE>
+        <VALUE>2.4.0g1</VALUE>
       </ANALYSIS_ATTRIBUTE>
     </ANALYSIS_ATTRIBUTES>
   </ANALYSIS>
