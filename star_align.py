@@ -158,7 +158,7 @@ if __name__ == "__main__":
     optional = parser.add_argument_group("optional input parameters")
     optional.add_argument("--out", default="out.bam", help="Name of the output BAM file")
     optional.add_argument("--workDir", default="./", help="Work directory")
-    optional.add_argument("--metaData", default=None, help="File containing metadata for the alignment header")
+    optional.add_argument("--metaDataTab", default=None, help="File containing metadata for the alignment header")
     optional.add_argument("--analysisID", default=None, help="Analysis ID to be considered in the metadata file")
     optional.add_argument("--keepJunctions", default=False, action='store_true', help="keeps the junction file as {--out}.junctions")
     optional.add_argument("--useTMP", default=None, help="environment variable that is used as prefix for temprary data")
@@ -196,9 +196,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     ### some sanity checks on command line parameters
-    if args.metaData is not None:
-        if not os.path.exists(args.metaData):
-            raise Exception("File provided via --metaData does not exist\nFile: %s" % args.metaData)
+    if args.metaDataTab is not None:
+        if not os.path.exists(args.metaDataTab):
+            raise Exception("File provided via --metaDataTab does not exist\nFile: %s" % args.metaDataTab)
         if args.analysisID is None:
             raise Exception("When providing information in a metadata file, a value for --analysisID is required")
     if args.outSAMattrRGxml is not None and not os.path.exists(args.outSAMattrRGxml):
@@ -355,8 +355,8 @@ if __name__ == "__main__":
         })
 
     ### process read group information
-    if args.metaData is not None:
-        RG_dict = spreadsheet2RGdict(args.metaData, args.analysisID) 
+    if args.metaDataTab is not None:
+        RG_dict = spreadsheet2RGdict(args.metaDataTab, args.analysisID) 
     elif args.outSAMattrRGxml is not None:
         RG_dict = xml2RGdict(args.outSAMattrRGxml)
     elif args.outSAMattrRGline is not None:
