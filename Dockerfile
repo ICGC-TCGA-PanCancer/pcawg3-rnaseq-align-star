@@ -28,8 +28,8 @@ RUN     cd /opt/tophat-2.0.12 && ./configure --prefix=/opt --with-boost-libdir=/
 
 #install STAR
 RUN     wget https://github.com/alexdobin/STAR/archive/STAR_2.4.0g1.tar.gz
-RUN     tar xvzf STAR_2.4.0g1.tar.gz
-RUN     cp /opt/STAR-STAR_2.4.0g1/bin/Linux_x86_64/STAR /opt/bin/
+RUN     tar xvzf STAR_2.4.0i1.tar.gz
+RUN     cp /opt/STAR-STAR_2.4.0i1/bin/Linux_x86_64/STAR /opt/bin/
 
 #install python packages
 RUN     pip install lxml
