@@ -37,13 +37,13 @@ sub main()
 	while(my $line = <IN>)
 	{
 		chomp($line);
-		my ($original_analysis_id,$new_filepath,$new_md5,$run_cmd) = split(/\t/,$line);
+		my ($original_analysis_id,$new_filepath,$new_md5,$run_cmd,$aligner) = split(/\t/,$line);
 		#dump original metadata
 		run_command("dump_all_metadata.py $original_analysis_id",$STDOUT_FILE,$STDERR_FILE);
 		#exract original metadata still relevant to PCAWG metadata
 		my $md_lines = extract_old_metadata_elements($original_analysis_id);
 		#create new metadata package from old metadata bits and template
-		my $new_analysis_id = synthesize_new_analysis($md_lines,$new_filepath,$new_md5,$run_cmd,$template_analysis_xml,$original_analysis_id);
+		my $new_analysis_id = synthesize_new_analysis($md_lines,$new_filepath,$new_md5,$run_cmd,$template_analysis_xml,$original_analysis_id,$aligner);
 		#do the actual validation->submission->upload
 		if(validate_new_metadata($new_analysis_id) && $submit_key)
 		{
@@ -94,7 +94,7 @@ sub upload_data()
 
 sub synthesize_new_analysis()
 {
-	my ($md_lines,$filepath,$md5,$run_cmd,$templateF,$original_analysis_id) = @_;
+	my ($md_lines,$filepath,$md5,$run_cmd,$templateF,$original_analysis_id,$aligner) = @_;
     my @run_cmds = split(/\$/,$run_cmd);
 
  	my @f=split(/\//,$filepath);
@@ -108,7 +108,7 @@ sub synthesize_new_analysis()
 	#copy the original metadata into the new directory
 	run_command("rsync -av $original_analysis_id/*.xml $new_analysis_id/");
 	#link in the new realigned file into the new directory
-	run_command("ln -s $filepath $new_analysis_id/PCAWG.$filename");
+	run_command("ln -s $filepath $new_analysis_id/$original_analysis_id.$aligner.v1.bam");
 	
 	open(TEMPLATE,"<$templateF");
 	open(OUT,">$new_analysis_id/analysis.xml");
