@@ -106,8 +106,8 @@ def spreadsheet2RGdict(spreadFile, analysisID):
                 'PL' : rec[k2f['platform']],
                 'PM' : rec[k2f['platform_model']],
                 'SM' : rec[k2f['sample_id']],
-                'SI' : rec[k2f['submitter_sample_id']],
-                'RG' : rec[k2f['read_group_label']].split(',')}
+                'SI' : rec[k2f['submitter_sample_id']]}
+   #             'RG' : rec[k2f['read_group_label']].split(',')}
 
     return RG_dict
 
@@ -141,11 +141,6 @@ def xml2RGdict(xmlfile):
                 'SM' : sample_id,
                 'SI' : submitter_id}
 
-    ### collect read group labels and add them to dict
-    RG_dict['RG'] = []
-    for x in rtree.find('analysis_xml/ANALYSIS_SET/ANALYSIS/ANALYSIS_TYPE/REFERENCE_ALIGNMENT/RUN_LABELS').getchildren():
-        RG_dict['RG'].append(x.attrib['read_group_label'])
-        
     return RG_dict
 
 
@@ -162,7 +157,6 @@ if __name__ == "__main__":
     optional.add_argument("--analysisID", default=None, help="Analysis ID to be considered in the metadata file")
     optional.add_argument("--keepJunctions", default=False, action='store_true', help="keeps the junction file as {--out}.junctions")
     optional.add_argument("--useTMP", default=None, help="environment variable that is used as prefix for temprary data")
-    optional.add_argument("--weakRGcheck", action='store_true', default=False, help="only perform weak RG record check and generate generic RG ID in case of a single alignment file with multiple RG records present. Use with caution!")
     optional.add_argument("-h", "--help", action='store_true', help="show this help message and exit")
     star = parser.add_argument_group("STAR input parameters")
     star.add_argument("--runThreadN", type=int, default=4, help="Number of threads")
@@ -172,6 +166,7 @@ if __name__ == "__main__":
     star.add_argument("--alignIntronMax", type=int, default=500000, help="alignIntronMax")
     star.add_argument("--alignMatesGapMax", type=int, default=1000000, help="alignMatesGapMax")
     star.add_argument("--sjdbScore", type=int, default=2, help="sjdbScore")
+    star.add_argument("--limitBAMsortRAM", type=int, default=0, help="limitBAMsortRAM")
     star.add_argument("--alignSJDBoverhangMin", type=int, default=1, help="alignSJDBoverhangMin")
     star.add_argument("--genomeLoad", default="NoSharedMemory", help="genomeLoad")
     star.add_argument("--genomeFastaFiles", default=None, help="genome sequence in fasta format to rebuild index")
@@ -314,6 +309,7 @@ if __name__ == "__main__":
 --sjdbScore ${sjdbScore} \
 --alignSJDBoverhangMin ${alignSJDBoverhangMin} \
 --genomeLoad ${genomeLoad} \
+--limitBAMsortRAM ${limitBAMsortRAM} \
 --readFilesCommand ${readFilesCommand} \
 --outFilterMatchNminOverLread ${outFilterMatchNminOverLread} \
 --outFilterScoreMinOverLread ${outFilterScoreMinOverLread} \
@@ -338,6 +334,7 @@ if __name__ == "__main__":
         'sjdbScore': args.sjdbScore,
         'alignSJDBoverhangMin' : args.alignSJDBoverhangMin,
         'genomeLoad' : args.genomeLoad,
+        'limitBAMsortRAM' : args.limitBAMsortRAM,
         'readFilesCommand' : align_sets[0],
         'outFilterMatchNminOverLread' : args.outFilterMatchNminOverLread,
         'outFilterScoreMinOverLread' : args.outFilterScoreMinOverLread,
@@ -368,21 +365,16 @@ if __name__ == "__main__":
     else:
         RG_dict = {'ID' : '', 'SM' : ''}
 
-    ### perform sanity check on provided RG records
-    if 'RG' in RG_dict:
-        if args.weakRGcheck and len(align_sets[1]) == 1 and len(RG_dict['RG']) > 1:
-            RG_dict['RG'] = [RG_dict['ID']]
-            print >> sys.stderr, 'WARNING: generated generic RG ID: %s' % RG_dict['ID']
-        else:
-            assert (len(align_sets[1]) == len(RG_dict['RG'])), 'Number of input file (pairs) does not match read groups in given RUN-xml' 
-
     ### post-process RG-dict to comply with STAR conventions
     for key in RG_dict:
-        if key == 'RG':
-            continue
         sl = RG_dict[key].split(' ')
         if len(sl) > 1:
             RG_dict[key] = '"%s"' % RG_dict[key]
+
+    ### use filename stub as read group label
+    RG_dict['RG'] = []
+    for fn in [x[1] for x in align_sets[1]]:
+        RG_dict['RG'].append(re.sub('(_[12])*.fastq(.(gz|bz2|bz))*', '', os.path.basename(fn)))
 
     ### convert RG_dict into formatted RG line
     RG_line = []
