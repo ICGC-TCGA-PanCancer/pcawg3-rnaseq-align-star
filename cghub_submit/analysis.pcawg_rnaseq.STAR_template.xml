@@ -2,7 +2,7 @@
 <ANALYSIS_SET xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.ncbi.nlm.nih.gov/viewvc/v1/trunk/sra/doc/SRA_1-5/SRA.analysis.xsd?view=co">
   <ANALYSIS alias="PCAWG.94f8d946-a92e-4d2b-9f29-8e10f4274efe.bam" analysis_date="2014-08-02T21:48:26.320095" center_name="MSKCC">
     <TITLE>TCGA/ICGC PanCancer RNA-Seq realignment</TITLE>
-    <STUDY_REF refcenter="UCSC" refname="PCAWG_TEST">
+    <STUDY_REF refcenter="UCSC" refname="PCAWG 2.0">
     </STUDY_REF>
     <DESCRIPTION>STAR realignment of TCGA RNA-Seq data from matching participants from the PanCan Analysis of Whole Genomes (PCAWG) study</DESCRIPTION>
     <ANALYSIS_TYPE>
@@ -104,7 +104,7 @@
               <STEP_INDEX>mapping</STEP_INDEX>
               <PREV_STEP_INDEX>NIL</PREV_STEP_INDEX>
               <PROGRAM>STAR</PROGRAM>
-              <VERSION>2.4.0g1</VERSION>
+              <VERSION>2.4.0i</VERSION>
               <NOTES>STAR --genomeDir hg19_GRCh37.p13_STAR_gencode19.overhang100 --readFilesIn left.fastq right.fastq --runThreadN runThreadN --outFilterMultimapScoreRange 1 --outFilterMultimapNmax 20 --outFilterMismatchNmax 10 --alignIntronMax 500000 --alignMatesGapMax 1000000 --sjdbScore 2 --alignSJDBoverhangMin 1 --genomeLoad NoSharedMemory --readFilesCommand bzcat --outFilterMatchNminOverLread 0.33 --outFilterScoreMinOverLread 0.33 --outSAMstrandField intronMotif --outSAMattributes NH HI NM MD AS XS --outSAMunmapped Within --outSAMtype BAM Unsorted</NOTES>
             </PIPE_SECTION>
           </PIPELINE>
@@ -124,7 +124,7 @@
     <ANALYSIS_ATTRIBUTES>
       <ANALYSIS_ATTRIBUTE>
         <TAG>STUDY</TAG>
-        <VALUE>PCAWG_TEST</VALUE>
+        <VALUE>PCAWG 2.0</VALUE>
       </ANALYSIS_ATTRIBUTE>
       <ANALYSIS_ATTRIBUTE>
         <TAG>workflow_name</TAG>
@@ -144,7 +144,7 @@
       </ANALYSIS_ATTRIBUTE>
       <ANALYSIS_ATTRIBUTE>
         <TAG>STAR_version</TAG>
-        <VALUE>2.4.0g1</VALUE>
+        <VALUE>2.4.0i</VALUE>
       </ANALYSIS_ATTRIBUTE>
     </ANALYSIS_ATTRIBUTES>
   </ANALYSIS>
