@@ -128,11 +128,11 @@
       </ANALYSIS_ATTRIBUTE>
       <ANALYSIS_ATTRIBUTE>
         <TAG>workflow_name</TAG>
-        <VALUE>Workflow_Bundle_STAR</VALUE>
+        <VALUE>RNA-Seq_Alignment_SOP_STAR</VALUE>
       </ANALYSIS_ATTRIBUTE>
       <ANALYSIS_ATTRIBUTE>
         <TAG>workflow_version</TAG>
-        <VALUE>0.1</VALUE>
+        <VALUE>v1</VALUE>
       </ANALYSIS_ATTRIBUTE>
       <ANALYSIS_ATTRIBUTE>
         <TAG>workflow_source_url</TAG>
