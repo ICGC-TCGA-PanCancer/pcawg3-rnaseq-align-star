@@ -105,8 +105,8 @@ def spreadsheet2RGdict(spreadFile, analysisID):
                 'LB' : 'RNA-Seq:%s:%s' % (rec[k2f['center_name']], rec[k2f['lib_id']]),
                 'PL' : rec[k2f['platform']],
                 'PM' : rec[k2f['platform_model']],
-                'SM' : rec[k2f['sample_id']],
-                'SI' : rec[k2f['submitter_sample_id']]}
+                'SM' : rec[k2f['specimen_id']],
+                'SI' : rec[k2f['submitted_sample_id']]}
    #             'RG' : rec[k2f['read_group_label']].split(',')}
 
     return RG_dict
@@ -374,7 +374,7 @@ if __name__ == "__main__":
     ### use filename stub as read group label
     RG_dict['RG'] = []
     for fn in [x[1] for x in align_sets[1]]:
-        RG_dict['RG'].append(re.sub('(_[12])*.fastq(.(gz|bz2|bz))*', '', os.path.basename(fn)))
+        RG_dict['RG'].append(re.sub('(_[12]){,1}.fastq(.(gz|bz2|bz))*', '', os.path.basename(fn)))
 
     ### convert RG_dict into formatted RG line
     RG_line = []
