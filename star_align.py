@@ -83,7 +83,7 @@ def spreadsheet2dict(spreadFile):
             for k, key in enumerate(sl):
                 key2field[key] = k
         else:
-            spreadDict[sl[key2field['fastq_analysis_id']]] = sl
+            spreadDict[sl[key2field['analysis_id']]] = sl
     
     return (spreadDict, key2field)
 
@@ -107,9 +107,12 @@ def spreadsheet2RGdict(spreadFile, analysisID):
                 'PM' : rec[k2f['platform_model']],
                 'SM' : rec[k2f['specimen_id']],
                 'SI' : rec[k2f['submitted_sample_id']]}
-   #             'RG' : rec[k2f['read_group_label']].split(',')}
 
-    return RG_dict
+    files = []
+    if 'fastq_files' in k2f:
+        files = rec[k2f['fastq_files']].strip(' ').split(' ')
+
+    return (RG_dict, files)
 
 
 def xml2RGdict(xmlfile):
@@ -219,6 +222,41 @@ if __name__ == "__main__":
     ### collect fastq information from extraction dir
     align_sets = scan_workdir(os.path.abspath(workdir))
     
+    ### process read group information
+    files = []
+    if args.metaDataTab is not None:
+        (RG_dict, files_tmp) = spreadsheet2RGdict(args.metaDataTab, args.analysisID) 
+        files.extend(files_tmp)
+    elif args.outSAMattrRGxml is not None:
+        RG_dict = xml2RGdict(args.outSAMattrRGxml)
+    elif args.outSAMattrRGline is not None:
+        RG_dict = dict([(x.split(':', 1)[0], x.split(':', 1)[1]) for x in args.outSAMattrRGline.split()])
+    elif args.outSAMattrRGfile is not None:
+        _fh = open(args.outSAMattrRGfile, 'r')
+        RG_dict = dict([(x.split(':', 1)[0], x.split(':', 1)[1]) for x in _fh.next().strip().split()])
+        _fh.close()
+    else:
+        RG_dict = {'ID' : '', 'SM' : ''}
+
+    ### post-process RG-dict to comply with STAR conventions
+    for key in RG_dict:
+        sl = RG_dict[key].split(' ')
+        if len(sl) > 1:
+            RG_dict[key] = '"%s"' % RG_dict[key]
+
+    ### use list of fastq input files for whitelisting
+    if len(files) > 0:
+        align_sets = (align_sets[0], [x for x in align_sets[1] if (re.sub('(_[12]){,1}.fastq(.(gz|bz2|bz))*', '', os.path.basename(x[1])) in files)], align_sets[2])
+        if len(align_sets[1]) == 0:
+            print >> sys.stderr, 'All input files have been filtered out - no input remaining. Terminating.'
+            sys.exit()
+
+    ### use filename stub as read group label
+    RG_dict['RG'] = []
+    for fn in [x[1] for x in align_sets[1]]:
+        RG_dict['RG'].append(re.sub('(_[12]){,1}.fastq(.(gz|bz2|bz))*', '', os.path.basename(fn)))
+
+    ### prepare template string
     if align_sets[2] == 'PE':
         read_str = '${fastq_left} ${fastq_right}'
     else:
@@ -350,31 +388,6 @@ if __name__ == "__main__":
         cmd = string.Template(cmd).substitute({
             'fastq_right' : ','.join([os.path.join(x[0], x[2]) for x in align_sets[1]]) # os.path.abspath(pair[2]),
         })
-
-    ### process read group information
-    if args.metaDataTab is not None:
-        RG_dict = spreadsheet2RGdict(args.metaDataTab, args.analysisID) 
-    elif args.outSAMattrRGxml is not None:
-        RG_dict = xml2RGdict(args.outSAMattrRGxml)
-    elif args.outSAMattrRGline is not None:
-        RG_dict = dict([(x.split(':', 1)[0], x.split(':', 1)[1]) for x in args.outSAMattrRGline.split()])
-    elif args.outSAMattrRGfile is not None:
-        _fh = open(args.outSAMattrRGfile, 'r')
-        RG_dict = dict([(x.split(':', 1)[0], x.split(':', 1)[1]) for x in _fh.next().strip().split()])
-        _fh.close()
-    else:
-        RG_dict = {'ID' : '', 'SM' : ''}
-
-    ### post-process RG-dict to comply with STAR conventions
-    for key in RG_dict:
-        sl = RG_dict[key].split(' ')
-        if len(sl) > 1:
-            RG_dict[key] = '"%s"' % RG_dict[key]
-
-    ### use filename stub as read group label
-    RG_dict['RG'] = []
-    for fn in [x[1] for x in align_sets[1]]:
-        RG_dict['RG'].append(re.sub('(_[12]){,1}.fastq(.(gz|bz2|bz))*', '', os.path.basename(fn)))
 
     ### convert RG_dict into formatted RG line
     RG_line = []
