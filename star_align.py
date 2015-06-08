@@ -9,15 +9,47 @@ import subprocess
 import argparse
 import shutil
 import lxml.etree as etree
-from glob import glob
+import fnmatch
+
+def walk_dir(base, pattern):
+    files = []
+    for root, dirnames, filenames in os.walk(base):
+        for fname in fnmatch.filter(filenames, pattern):
+            files.append(os.path.join(root, fname))
+    return files
 
 def scan_workdir(base): 
 
     ### scan for paired-end files
     #############################
 
-    ### unzipped input
-    fastq_files = glob(os.path.join(base, "*_[12].fastq"))
+    ### unzipped fastq input
+    fastq_files = walk_dir(base, "*_read[12]_*")
+    if len(fastq_files):
+        o = {}
+        for i in sorted(fastq_files):
+            basename = re.sub(r'_read[12]', '', i)
+            try:
+                o[basename].append(i)
+            except KeyError:
+                o[basename] = [i]
+        if not all( (len(i) == 2 for i in o.values())):
+            raise Exception("Missing Pair")
+        return ( 'cat', list( (os.path.basename(i), o[i][0], o[i][1]) for i in o.keys()), 'PE') 
+
+    ### unzipped fastq input
+    fastq_files = walk_dir(base, "*_R[12]_001.fastq")
+    if len(fastq_files):
+        o = {}
+        for i in fastq_files:
+            basename = re.sub(r'_R[12]_001.fastq$', '', i)
+            o[basename] = o.get(basename, 0) + 1
+        if not all( (i == 2 for i in o.values())):
+            raise Exception("Missing Pair")
+        return ( 'cat', list( (os.path.basename(i), "%s_R1_001.fastq" % i,"%s_R2_001.fastq" % i) for i in o.keys()), 'PE') 
+
+    ### unzipped fastq input
+    fastq_files = walk_dir(base, "*_[12].fastq")
     if len(fastq_files):
         o = {}
         for i in fastq_files:
@@ -26,9 +58,20 @@ def scan_workdir(base):
         if not all( (i == 2 for i in o.values())):
             raise Exception("Missing Pair")
         return ( 'cat', list( (os.path.basename(i), "%s_1.fastq" % i,"%s_2.fastq" % i) for i in o.keys()), 'PE') 
+
+    ### unzipped txt input
+    fastq_files = walk_dir(base, "*_[12]_sequence.txt")
+    if len(fastq_files):
+        o = {}
+        for i in fastq_files:
+            basename = re.sub(r'_[12]_sequence.txt$', '', i)
+            o[basename] = o.get(basename, 0) + 1
+        if not all( (i == 2 for i in o.values())):
+            raise Exception("Missing Pair")
+        return ( 'cat', list( (os.path.basename(i), "%s_1_sequence.txt" % i,"%s_2_sequence.txt" % i) for i in o.keys()), 'PE') 
     
     ### gzipped input
-    fastq_gz_files = glob(os.path.join(base, "*_[12].fastq.gz"))
+    fastq_gz_files = walk_dir(base, "*_[12].fastq.gz")
     if len(fastq_gz_files):
         o = {}
         for i in fastq_gz_files:
@@ -39,7 +82,7 @@ def scan_workdir(base):
         return ( 'zcat', list( (os.path.basename(i), "%s_1.fastq.gz" % i,"%s_2.fastq.gz" % i) for i in o.keys()), 'PE') 
 
     ### bzipped input
-    fastq_bz_files = glob(os.path.join(base, "*_[12].fastq.bz"))
+    fastq_bz_files = walk_dir(base, "*_[12].fastq.bz")
     if len(fastq_gz_files):
         o = {}
         for i in fastq_gz_files:
@@ -53,17 +96,17 @@ def scan_workdir(base):
     #############################
 
     ### unzipped input
-    fastq_files = glob(os.path.join(base, "*.fastq"))
+    fastq_files = walk_dir(base, "*.fastq")
     if len(fastq_files):
         return ( 'cat', list( (os.path.basename(re.sub(r'.fastq$', '', i)), i) for i in fastq_files), 'SE') 
 
     ### gzipped input
-    fastq_files = glob(os.path.join(base, "*.fastq.gz"))
+    fastq_files = walk_dir(base, "*.fastq.gz")
     if len(fastq_files):
         return ( 'zcat', list( (os.path.basename(re.sub(r'.fastq.gz$', '', i)), i) for i in fastq_files), 'SE') 
 
     ### bzipped input
-    fastq_files = glob(os.path.join(base, "*.fastq.bz"))
+    fastq_files = walk_dir(base, "*.fastq.bz")
     if len(fastq_files):
         return ( 'bzcat', list( (os.path.basename(re.sub(r'.fastq.bz$', '', i)), i) for i in fastq_files), 'SE') 
 
@@ -215,6 +258,8 @@ if __name__ == "__main__":
         tarcmd = "tar xvjf %s -C %s" % (args.tarFileIn, workdir)
     elif args.tarFileIn.endswith(".tar"):
         tarcmd = "tar xvf %s -C %s" % (args.tarFileIn, workdir)
+    elif args.tarFileIn.endswith(".sra"):
+        tarcmd = "fastq-dump --gzip --split-3 --outdir %s %s" % (workdir, args.tarFileIn)
     else:
         raise Exception("Unknown input file extension for file %s" % (args.tarFileIn))
     subprocess.check_call(tarcmd, shell=True)
@@ -254,7 +299,11 @@ if __name__ == "__main__":
     ### use filename stub as read group label
     RG_dict['RG'] = []
     for fn in [x[1] for x in align_sets[1]]:
-        RG_dict['RG'].append(re.sub('(_[12]){,1}.fastq(.(gz|bz2|bz))*', '', os.path.basename(fn)))
+        fn_stub = re.sub('(_[12]){,1}.fastq(.(gz|bz2|bz))*', '', os.path.basename(fn))
+        fn_stub = re.sub('(_[12]){,1}_sequence.txt(.(gz|bz2|bz))*', '', fn_stub)
+        fn_stub = re.sub('_read[12]', '', fn_stub)
+        fn_stub = re.sub('_R[12]_001$', '', fn_stub)
+        RG_dict['RG'].append(fn_stub)
 
     ### prepare template string
     if align_sets[2] == 'PE':
