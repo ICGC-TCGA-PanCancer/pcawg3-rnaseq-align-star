@@ -37,13 +37,13 @@ sub main()
 	while(my $line = <IN>)
 	{
 		chomp($line);
-		my ($original_analysis_id,$new_filepath,$new_md5,$run_cmd,$aligner) = split(/\t/,$line);
+		my ($original_analysis_id,$new_filepath,$new_md5,$run_cmd,$aligner,$sub_donor_id,$sub_spec_id,$sub_sample_id,$project_code,$specimen_id,$icgc_donor_id,$icgc_spec_id,$icgc_sample_id) = split(/\t/,$line);
 		#dump original metadata
-		run_command("dump_all_metadata.py $original_analysis_id",$STDOUT_FILE,$STDERR_FILE);
+		run_command("python dump_all_metadata.py $original_analysis_id",$STDOUT_FILE,$STDERR_FILE);
 		#exract original metadata still relevant to PCAWG metadata
 		my $md_lines = extract_old_metadata_elements($original_analysis_id);
 		#create new metadata package from old metadata bits and template
-		my $new_analysis_id = synthesize_new_analysis($md_lines,$new_filepath,$new_md5,$run_cmd,$template_analysis_xml,$original_analysis_id,$aligner);
+		my $new_analysis_id = synthesize_new_analysis($md_lines,$new_filepath,$new_md5,$run_cmd,$template_analysis_xml,$original_analysis_id,$aligner,$sub_donor_id,$sub_spec_id,$sub_sample_id,$project_code,$specimen_id,$icgc_donor_id,$icgc_spec_id,$icgc_sample_id);
 		#do the actual validation->submission->upload
 		if(validate_new_metadata($new_analysis_id) && $submit_key)
 		{
@@ -94,7 +94,7 @@ sub upload_data()
 
 sub synthesize_new_analysis()
 {
-	my ($md_lines,$filepath,$md5,$run_cmd,$templateF,$original_analysis_id,$aligner) = @_;
+	my ($md_lines,$filepath,$md5,$run_cmd,$templateF,$original_analysis_id,$aligner,$sub_donor_id,$sub_spec_id,$sub_sample_id,$project_code,$specimen_id,$icgc_donor_id,$icgc_spec_id,$icgc_sample_id) = @_;
     my @run_cmds = split(/\$/,$run_cmd);
 
     my $filename = "PCAWG.$original_analysis_id.$aligner.v1.bam";
@@ -132,6 +132,30 @@ sub synthesize_new_analysis()
 			my $val = $md_lines->{$FAILED_READS};
 			$line =~ s/$cur_val/$val/;
 		}
+        if($line =~ /<\/ANALYSIS_ATTRIBUTES>/)
+        {
+            my $attribline = "      <ANALYSIS_ATTRIBUTE>";
+            $attribline = "$attribline\n          <TAG>dcc_project_code</TAG>";
+            $attribline = "$attribline\n          <VALUE>$project_code</VALUE>";
+            $attribline = "$attribline\n        </ANALYSIS_ATTRIBUTE>";
+            $attribline = "$attribline\n      <ANALYSIS_ATTRIBUTE>";
+            $attribline = "$attribline\n          <TAG>submitter_donor_id</TAG>";
+            $attribline = "$attribline\n          <VALUE>$sub_donor_id</VALUE>";
+            $attribline = "$attribline\n        </ANALYSIS_ATTRIBUTE>";
+            $attribline = "$attribline\n      <ANALYSIS_ATTRIBUTE>";
+            $attribline = "$attribline\n          <TAG>submitter_sample_id</TAG>";
+            $attribline = "$attribline\n          <VALUE>$sub_sample_id</VALUE>";
+            $attribline = "$attribline\n        </ANALYSIS_ATTRIBUTE>";
+            $attribline = "$attribline\n      <ANALYSIS_ATTRIBUTE>";
+            $attribline = "$attribline\n          <TAG>submitter_specimen_id</TAG>";
+            $attribline = "$attribline\n          <VALUE>$sub_spec_id</VALUE>";
+            $attribline = "$attribline\n        </ANALYSIS_ATTRIBUTE>";
+            $attribline = "$attribline\n      <ANALYSIS_ATTRIBUTE>";
+            $attribline = "$attribline\n          <TAG>dcc_specimen_type</TAG>";
+            $attribline = "$attribline\n          <VALUE>$specimen_id</VALUE>";
+            $attribline = "$attribline\n        </ANALYSIS_ATTRIBUTE>";
+            print OUT "$attribline";
+        }
 		print OUT "$line\n";
 		if($line =~ /<\/ASSEMBLY>/)
 		{
