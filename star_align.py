@@ -24,7 +24,7 @@ def scan_workdir(base):
     #############################
 
     ### unzipped fastq input
-    fastq_files = walk_dir(base, "*_read[12]_*")
+    fastq_files = walk_dir(base, "*_read[12]_*fastq")
     if len(fastq_files):
         o = {}
         for i in sorted(fastq_files):
@@ -58,6 +58,28 @@ def scan_workdir(base):
         if not all( (i == 2 for i in o.values())):
             raise Exception("Missing Pair")
         return ( 'cat', list( (os.path.basename(i), "%s_1.fastq" % i,"%s_2.fastq" % i) for i in o.keys()), 'PE') 
+
+    ### unzipped fastq input
+    fastq_files = walk_dir(base, "*[.][12].fastq")
+    if len(fastq_files):
+        o = {}
+        for i in fastq_files:
+            basename = re.sub(r'[.][12].fastq$', '', i)
+            o[basename] = o.get(basename, 0) + 1
+        if not all( (i == 2 for i in o.values())):
+            raise Exception("Missing Pair")
+        return ( 'cat', list( (os.path.basename(i), "%s.1.fastq" % i,"%s.2.fastq" % i) for i in o.keys()), 'PE') 
+
+    ### unzipped fastq input
+    fastq_files = walk_dir(base, "*.fastq[12]")
+    if len(fastq_files):
+        o = {}
+        for i in fastq_files:
+            basename = re.sub(r'.fastq[12]$', '', i)
+            o[basename] = o.get(basename, 0) + 1
+        if not all( (i == 2 for i in o.values())):
+            raise Exception("Missing Pair")
+        return ( 'cat', list( (os.path.basename(i), "%s.fastq1" % i,"%s.fastq2" % i) for i in o.keys()), 'PE') 
 
     ### unzipped txt input
     fastq_files = walk_dir(base, "*_[12]_sequence.txt")
@@ -99,6 +121,11 @@ def scan_workdir(base):
     fastq_files = walk_dir(base, "*.fastq")
     if len(fastq_files):
         return ( 'cat', list( (os.path.basename(re.sub(r'.fastq$', '', i)), i) for i in fastq_files), 'SE') 
+
+    ### unzipped input
+    fastq_files = walk_dir(base, "*.fq")
+    if len(fastq_files):
+        return ( 'cat', list( (os.path.basename(re.sub(r'.fq$', '', i)), i) for i in fastq_files), 'SE') 
 
     ### gzipped input
     fastq_files = walk_dir(base, "*.fastq.gz")
@@ -153,7 +180,8 @@ def spreadsheet2RGdict(spreadFile, analysisID):
 
     files = []
     if 'fastq_files' in k2f:
-        files = rec[k2f['fastq_files']].strip(' ').split(' ')
+        if not rec[k2f['fastq_files']].strip(' ') in ['N/A', 'NA', 'no', '']:
+            files = rec[k2f['fastq_files']].strip(' ').split(' ')
 
     return (RG_dict, files)
 
